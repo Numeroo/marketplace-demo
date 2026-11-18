@@ -68,6 +68,12 @@ alter table public.listings enable row level security;
 alter table public.listing_images enable row level security;
 alter table public.messages enable row level security;
 
+grant usage on schema public to anon, authenticated;
+grant select on public.profiles, public.listings, public.listing_images to anon, authenticated;
+grant select, insert, update, delete on public.messages to authenticated;
+grant insert, update, delete on public.profiles to authenticated;
+grant insert, update, delete on public.listings, public.listing_images to authenticated;
+
 create policy "Profiles are public"
   on public.profiles for select using (true);
 create policy "Users can update their own profile"
