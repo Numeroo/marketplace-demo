@@ -6,10 +6,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Supabase is not configured." }, { status: 503 })
   }
 
-  const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "")
-  if (!token) return NextResponse.json({ error: "Authentication required." }, { status: 401 })
-
-  const form = await request.formData()
+  let form: FormData
+  try {
+    form = await request.formData()
+  } catch {
+    return NextResponse.json({ error: "Expected multipart form data." }, { status: 400 })
+  }
   const file = form.get("file")
   if (!(file instanceof File)) {
     return NextResponse.json({ error: "A file field is required." }, { status: 400 })
@@ -21,14 +23,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Image must be no larger than 5 MB." }, { status: 400 })
   }
 
-  const supabase = getSupabaseClient(token)!
-  const { data: userData, error: userError } = await supabase.auth.getUser()
-  if (userError || !userData.user) {
-    return NextResponse.json({ error: "Invalid or expired authentication." }, { status: 401 })
-  }
+  const supabase = getSupabaseClient()!
 
   const extension = file.name.split(".").pop()?.toLowerCase() || "jpg"
-  const path = `${userData.user.id}/${crypto.randomUUID()}.${extension}`
+  const path = `listings/${crypto.randomUUID()}.${extension}`
   const { error } = await supabase.storage
     .from("listing-images")
     .upload(path, file, { contentType: file.type, upsert: false })

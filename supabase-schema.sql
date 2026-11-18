@@ -132,3 +132,40 @@ create policy "Authenticated users can upload listing images"
 create policy "Users can delete their uploaded listing images"
   on storage.objects for delete
   using (bucket_id = 'listing-images' and owner_id = auth.uid()::text);
+
+alter table public.listings
+  add column if not exists seller_email varchar(255),
+  add column if not exists image_url text,
+  alter column seller_id drop not null,
+  alter column condition set default 'Used - good';
+
+alter table public.messages
+  add column if not exists buyer_email varchar(255),
+  add column if not exists seller_email varchar(255),
+  add column if not exists message text,
+  alter column sender_id drop not null;
+
+drop policy if exists "Active listings are public" on public.listings;
+create policy "Active listings are public"
+  on public.listings for select using (status = 'active' or auth.uid() = seller_id);
+
+drop policy if exists "Authenticated users can create listings" on public.listings;
+drop policy if exists "Anyone can create listings" on public.listings;
+create policy "Anyone can create listings"
+  on public.listings for insert with check (true);
+
+drop policy if exists "Anyone can view messages" on public.messages;
+drop policy if exists "Authenticated users can send messages" on public.messages;
+drop policy if exists "Anyone can create messages" on public.messages;
+create policy "Anyone can create messages"
+  on public.messages for insert with check (true);
+
+drop policy if exists "Authenticated users can upload listing images" on storage.objects;
+drop policy if exists "Anyone can upload listing images" on storage.objects;
+create policy "Anyone can upload listing images"
+  on storage.objects for insert with check (bucket_id = 'listing-images');
+
+grant select, insert on public.listings to anon, authenticated;
+grant select, insert on public.messages to anon, authenticated;
+grant insert on public.listing_images to anon, authenticated;
+grant select, insert on storage.objects to anon, authenticated;

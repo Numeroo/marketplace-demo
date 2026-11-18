@@ -12,7 +12,7 @@ export function ItemGrid({ items }: { items: MarketplaceItem[] }) {
         <Link key={item.id} href={`/item/${item.id}`} className="group min-w-0 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1877F2]">
           <article className="overflow-hidden rounded-lg bg-white transition-shadow duration-200 group-hover:shadow-md">
             <div className="relative aspect-square overflow-hidden rounded-lg bg-zinc-100">
-              <img src={item.image} alt={item.title} loading={Number(item.id) > 5 ? "lazy" : "eager"} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.025]" />
+              {item.image && <img src={item.image} alt={item.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.025]" />}
               {item.condition === "New" && <span className="absolute left-2 top-2 rounded-md bg-white/95 px-2 py-1 text-[10px] font-semibold text-zinc-800 shadow-sm">New</span>}
             </div>
             <div className="px-0.5 pb-1 pt-2">
