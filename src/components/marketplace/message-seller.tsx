@@ -30,7 +30,7 @@ export function MessageSeller({ listingId }: { listingId: string }) {
       setEmailSent(result.email?.sent === true)
       setStatus(result.email?.sent
         ? "Message saved and email sent to the seller."
-        : "Message saved. Seller email notifications are not configured yet.")
+        : result.email?.reason || "Message saved, but seller email delivery is unavailable.")
       setMessage("")
     } catch (sendError) {
       setError(sendError instanceof Error ? sendError.message : "Your message could not be sent.")

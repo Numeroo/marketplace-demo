@@ -1,6 +1,6 @@
 "use client"
 
-import { ChangeEvent, FormEvent, useState } from "react"
+import { ChangeEvent, FormEvent, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { AlertCircle, CheckCircle2, ChevronLeft, ImagePlus, LoaderCircle } from "lucide-react"
 import Link from "next/link"
@@ -21,6 +21,12 @@ export default function CreateItemPage() {
   const [previewUrl, setPreviewUrl] = useState("")
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState("")
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl)
+    }
+  }, [previewUrl])
 
   function choosePhoto(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]

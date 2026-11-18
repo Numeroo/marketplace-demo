@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
   const search = request.nextUrl.searchParams
   let query = supabase
     .from("listings")
-    .select("*, listing_images(id, image_url, sort_order)")
+    .select("id, title, price, location, category, image_url, description, condition, created_at, listing_images(id, image_url, sort_order)")
     .eq("status", "active")
     .order("created_at", { ascending: false })
 
@@ -35,7 +35,9 @@ export async function GET(request: NextRequest) {
 
   const { data, error } = await query
   if (error) return NextResponse.json<ApiError>({ error: error.message }, { status: 500 })
-  return NextResponse.json({ data })
+  return NextResponse.json({ data }, {
+    headers: { "Cache-Control": "public, max-age=0, s-maxage=15, stale-while-revalidate=60" },
+  })
 }
 
 export async function POST(request: NextRequest) {

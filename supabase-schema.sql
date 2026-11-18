@@ -74,29 +74,39 @@ grant select, insert, update, delete on public.messages to authenticated;
 grant insert, update, delete on public.profiles to authenticated;
 grant insert, update, delete on public.listings, public.listing_images to authenticated;
 
+drop policy if exists "Profiles are public" on public.profiles;
 create policy "Profiles are public"
   on public.profiles for select using (true);
+drop policy if exists "Users can update their own profile" on public.profiles;
 create policy "Users can update their own profile"
   on public.profiles for update using (auth.uid() = id);
+drop policy if exists "Users can insert their own profile" on public.profiles;
 create policy "Users can insert their own profile"
   on public.profiles for insert with check (auth.uid() = id);
 
+drop policy if exists "Active listings are public" on public.listings;
 create policy "Active listings are public"
   on public.listings for select using (status = 'active' or auth.uid() = seller_id);
+drop policy if exists "Authenticated users can create listings" on public.listings;
 create policy "Authenticated users can create listings"
   on public.listings for insert with check (auth.uid() = seller_id);
+drop policy if exists "Sellers can update listings" on public.listings;
 create policy "Sellers can update listings"
   on public.listings for update using (auth.uid() = seller_id);
+drop policy if exists "Sellers can delete listings" on public.listings;
 create policy "Sellers can delete listings"
   on public.listings for delete using (auth.uid() = seller_id);
 
+drop policy if exists "Listing images are public" on public.listing_images;
 create policy "Listing images are public"
   on public.listing_images for select using (true);
+drop policy if exists "Sellers can manage listing images" on public.listing_images;
 create policy "Sellers can manage listing images"
   on public.listing_images for all
   using (exists (select 1 from public.listings l where l.id = listing_id and l.seller_id = auth.uid()))
   with check (exists (select 1 from public.listings l where l.id = listing_id and l.seller_id = auth.uid()));
 
+drop policy if exists "Participants can read messages" on public.messages;
 create policy "Participants can read messages"
   on public.messages for select
   using (
@@ -106,6 +116,7 @@ create policy "Participants can read messages"
       where l.id = listing_id and l.seller_id = auth.uid()
     )
   );
+drop policy if exists "Authenticated users can send messages" on public.messages;
 create policy "Authenticated users can send messages"
   on public.messages for insert
   with check (auth.uid() = sender_id);
@@ -123,12 +134,15 @@ on conflict (id) do update set
   file_size_limit = excluded.file_size_limit,
   allowed_mime_types = excluded.allowed_mime_types;
 
+drop policy if exists "Listing images are publicly readable" on storage.objects;
 create policy "Listing images are publicly readable"
   on storage.objects for select
   using (bucket_id = 'listing-images');
+drop policy if exists "Authenticated users can upload listing images" on storage.objects;
 create policy "Authenticated users can upload listing images"
   on storage.objects for insert
   with check (bucket_id = 'listing-images' and auth.uid() is not null);
+drop policy if exists "Users can delete their uploaded listing images" on storage.objects;
 create policy "Users can delete their uploaded listing images"
   on storage.objects for delete
   using (bucket_id = 'listing-images' and owner_id = auth.uid()::text);

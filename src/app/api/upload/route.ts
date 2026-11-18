@@ -25,7 +25,12 @@ export async function POST(request: NextRequest) {
 
   const supabase = getSupabaseClient()!
 
-  const extension = file.name.split(".").pop()?.toLowerCase() || "jpg"
+  const extensionByType: Record<string, string> = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+  }
+  const extension = extensionByType[file.type]
   const path = `listings/${crypto.randomUUID()}.${extension}`
   const { error } = await supabase.storage
     .from("listing-images")

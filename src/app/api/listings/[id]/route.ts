@@ -29,5 +29,7 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
       image_url: data.image_url || data.listing_images?.[0]?.image_url || null,
       seller_email: data.seller_email || null,
     },
+  }, {
+    headers: { "Cache-Control": "public, max-age=0, s-maxage=15, stale-while-revalidate=60" },
   })
 }
